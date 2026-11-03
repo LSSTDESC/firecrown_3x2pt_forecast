@@ -1,0 +1,6 @@
+# Written by generate_configs.py
+cosmosis/
+cobaya/
+numcosmo/
+__pycache__/
+.mypy_cache/
