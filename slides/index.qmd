@@ -66,9 +66,10 @@ Tutorial: [Introduction](https://firecrown.readthedocs.io/en/latest/_static/intr
   angular power spectra.
 - **Firecrown** computes the likelihood from both; each sampler calls it through a connector:
   $$
-  \text{TXPipe} \longrightarrow \text{SACC} \longrightarrow \textbf{Firecrown} \longleftarrow \text{CCL},
-  \qquad
-  \textbf{Firecrown} \longrightarrow \{\text{Cobaya},\ \text{CosmoSIS},\ \text{NumCosmo}\}.
+  \begin{gathered}
+  \text{TXPipe} \longrightarrow \text{SACC} \longrightarrow \textbf{Firecrown} \longleftarrow \text{CCL} \\
+  \textbf{Firecrown} \longrightarrow \{\text{Cobaya},\ \text{CosmoSIS},\ \text{NumCosmo}\}
+  \end{gathered}
   $$
 
 ## Three Concepts
