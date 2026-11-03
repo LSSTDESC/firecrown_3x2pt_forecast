@@ -124,6 +124,12 @@ point is 539.08 for 540 data points.
 
 Both SACC files record these settings in their metadata.
 
+**Tracer order of the galaxy-galaxy lensing spectra.** The 7 `galaxy_shearDensity_cl_e` spectra
+store the lens tracer first (`lens0`, `src2`), as the input SACC file does; the SACC naming
+convention puts the shear tracer first. Firecrown matches the spectra to their sources either
+way, so the likelihood is not affected, and `firecrown sacc view --check` reports the 7 pairs. The
+order is kept on purpose: the slides use it as an example of `--check`.
+
 ## Sampled parameters
 
 `generate_configs.py` declares 8 free parameters with uniform priors: Ω_c in

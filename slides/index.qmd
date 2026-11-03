@@ -202,6 +202,66 @@ Repository: `firecrown_3x2pt_forecast` (see its `README.md`)
 The cosmology and lens bias follow the LSST DESC SRD Y1 setup; magnification and the intrinsic
 alignment amplitude are choices of this forecast.
 
+## Inspecting the Data: `firecrown sacc view` {.tall-code}
+
+```bash
+$ firecrown sacc view forecast_3x2pt_srd_y1_noisy.sacc
+```
+
+```
+╭────── SACC Summary ──────╮
+│ Number of tracers: 10    │
+│ Data points: 540         │
+│ Covariance elements: 540 │
+╰──────────────────────────╯
+┏━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Name  ┃ TypeSource ┃ z min-max (density) ┃ dndz mean, std  ┃ Measurements ┃
+┡━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ lens0 │ default    │ 0.000-4.000         │ 0.317 +/- 0.068 │ {COUNTS}     │
+│ ...   │            │                     │                 │              │
+│ lens4 │ default    │ 0.000-4.000         │ 1.093 +/- 0.085 │ {COUNTS}     │
+│ src0  │ default    │ 0.000-4.000         │ 0.251 +/- 0.094 │ {SHEAR_E}    │
+│ ...   │            │                     │                 │              │
+│ src4  │ default    │ 0.000-4.000         │ 1.535 +/- 0.434 │ {SHEAR_E}    │
+└───────┴────────────┴─────────────────────┴─────────────────┴──────────────┘
+┏━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ x-bin ┃ y-bin ┃ x-meas  ┃ y-meas  ┃ ells: min-max (length, mean-delta) ┃ Window? ┃ SACC Datatype            ┃
+┡━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ lens0 │ lens0 │ COUNTS  │ COUNTS  │      0 -   2000 (  2001, 1.00)     │ Yes     │ galaxy_density_cl        │
+│ src2  │ lens0 │ SHEAR_E │ COUNTS  │      0 -   2000 (  2001, 1.00)     │ Yes     │ galaxy_shearDensity_cl_e │
+│ src0  │ src0  │ SHEAR_E │ SHEAR_E │      0 -   2000 (  2001, 1.00)     │ Yes     │ galaxy_shear_cl_ee       │
+│ ...   (27 spectra: 5 clustering, 7 galaxy-galaxy lensing, 15 shear)                                            │
+└───────┴───────┴─────────┴─────────┴────────────────────────────────────┴─────────┴──────────────────────────┘
+```
+
+The file holds everything the likelihood needs: tracers, $\mathrm{d}N/\mathrm{d}z$, bin pairs, data
+types and bandpower windows. With windows, the $\ell$ column shows the range of the window
+($0 \le \ell \le 2000$), not the 20 bandpowers. `view` gives this detail for two-point data.
+
+## Validating the Data: `firecrown sacc view --check`
+
+```bash
+$ firecrown sacc view forecast_3x2pt_srd_y1_noisy.sacc --check
+```
+
+```
+──────────────────────── SACC Quality Checks ────────────────────────
+⚠️  Found 7 tracer naming convention violation(s)
+  • Tracers 'lens0' and 'src2' (data type: 'galaxy_shearDensity_cl_e')
+  • Tracers 'lens0' and 'src3' (data type: 'galaxy_shearDensity_cl_e')
+  • Tracers 'lens0' and 'src4' (data type: 'galaxy_shearDensity_cl_e')
+  • Tracers 'lens1' and 'src3' (data type: 'galaxy_shearDensity_cl_e')
+  • Tracers 'lens1' and 'src4' (data type: 'galaxy_shearDensity_cl_e')
+  • Tracers 'lens2' and 'src4' (data type: 'galaxy_shearDensity_cl_e')
+  • Tracers 'lens3' and 'src4' (data type: 'galaxy_shearDensity_cl_e')
+```
+
+An accidental feature of this tutorial: its own data breaks a convention. In
+`galaxy_shearDensity_cl_e` the shear tracer comes first; the 7 galaxy-galaxy lensing spectra store the
+lens tracer first. The order comes from the input SACC file, and `generate_data.py` copies it. Firecrown still matches the spectra to the right sources
+(`view` lists them as `src2 | lens0`), so the likelihood is correct; `--check` reports the file
+breaks the naming convention.
+
 ## The Likelihood Factory: `forecast_3x2pt.py`
 
 ```python
