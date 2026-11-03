@@ -350,11 +350,16 @@ Cobaya `mcmc`, 10 chains under MPI, stopping at $R - 1 < 0.01$.
 | initial proposal | acceptance |
 |---|---|
 | diagonal, 1% of each fiducial value | 2.8% (one chain, 720 steps) |
-| APES posterior covariance (`apes_covmat.py`) | 30% to 50% (10 chains, first 40 to 61 steps) |
+| APES posterior covariance (`apes_covmat.py`) | 30% (10 chains, 11165 steps) |
 
 The 1% widths are 1.5 to 3.5 times the posterior widths, and the posterior is strongly correlated, so
 most steps of a diagonal proposal of that size are rejected. With the covariance measured by APES,
 Cobaya proposes steps with the posterior's shape from the start.
+
+**Convergence** (state at 11:40): Cobaya checks every 320 accepted samples per chain. First check:
+$R - 1 = 0.175$ of the means after 3659 accepted samples, and the proposal covariance was updated
+from the chains. The run stops at $R - 1 < 0.01$; until then it keeps updating the proposal
+(`learn_proposal_Rminus1_min: 0`).
 
 ## Run It Yourself
 
