@@ -27,7 +27,7 @@ the likelihood.
 | `run_apes.sh` | runs the NumCosmo APES sampler under MPI (needs the `mpi_openmpi` or `mpi_mpich` build of NumCosmo) |
 | `numcosmo_mpi.py` | starts the `numcosmo` command line with the Firecrown types and models registered in every MPI rank (used by `run_apes.sh`) |
 | `numcosmo_catalog.py` | runs `numcosmo catalog` (`analyze`, `plot-corner`, ...) after creating the models the catalog refers to |
-| `paul_auto_forecast_fid_3x2pt_linear_sys_limber_20_log_bins.sacc` | input: tracers, n(z) and bandpower windows |
+| `paul_auto_forecast_fid_3x2pt_linear_sys_limber_20_log_bins.sacc` | input: tracers, dN/dz and bandpower windows |
 | `forecast_3x2pt_srd_y1.sacc` | noiseless data vector and covariance |
 | `forecast_3x2pt_srd_y1_noisy.sacc` | the same data vector plus one realization of the noise |
 
@@ -39,7 +39,8 @@ python generate_configs.py               # noisy data; add --noiseless for the n
 ./run_test.sh
 ```
 `run_test.sh` prints the log-likelihood at the fiducial point. With the noisy data,
-CosmoSIS and Cobaya report ln L = -269.54 and NumCosmo reports -2 ln L = 539.08. With
+CosmoSIS and Cobaya report a log-likelihood of -269.54 and NumCosmo reports -2 times the
+log-likelihood, 539.08. With
 `--noiseless`, all three report 0.
 
 `generate_configs.py` writes `cosmosis/`, `cobaya/` and `numcosmo/`. Each directory
@@ -61,16 +62,20 @@ repository's Pages source must be set to "GitHub Actions".
 `forecast_3x2pt.py` builds a Firecrown `ConstGaussian` likelihood:
 
 * lens bin i: galaxy bias
-  $b_i(z) = b_i\,[(1+z)/(1+z_{{\rm piv},i})]^{\alpha_{z,i}}\, D(z)^{\alpha_{g,i}}$
-  (`LinearBiasSystematic`, parameters `lens{i}_bias`, `lens{i}_alphaz`,
+  $b_i(z) = b_i\,[(1+z)/(1+z_{{\rm piv},i})]^{\alpha_{z,i}}\, D(z)^{\alpha_{g,i}}$ at redshift $z$,
+  with $D(z)$ the linear growth factor ($D = 1$ today) (`LinearBiasSystematic`; $b_i$,
+  $\alpha_{z,i}$, $z_{{\rm piv},i}$, $\alpha_{g,i}$ are `lens{i}_bias`, `lens{i}_alphaz`,
   `lens{i}_z_piv`, `lens{i}_alphag`), redshift-space distortions, magnification with
   slope s = `lens{i}_mag_bias` (`ConstantMagnificationBiasSystematic`), photo-z shift
   `lens{i}_delta_z`;
 * source bin i: photo-z shift `src{i}_delta_z` and intrinsic alignment
-  $A(z) = A_{\rm IA}\,[(1+z)/(1+z_{\rm piv})]^{\alpha_z}$ times CCL's $C_1\rho_{\rm crit}\Omega_m/D(z)$
-  (`LinearAlignmentSystematic`, parameters `ia_bias`, `alphaz`, `z_piv` shared by all
-  source bins);
-* cosmology: CCL in pure CCL mode, Eisenstein-Hu linear P(k), halofit nonlinear P(k),
+  $A(z) = A_{\rm IA}\,[(1+z)/(1+z_{\rm piv})]^{\alpha_z}$ times $C_1\rho_{\rm crit}\Omega_m/D(z)$,
+  where $C_1\rho_{\rm crit}$ is CCL's normalization of the linear alignment model
+  ($\rho_{\rm crit}$ the critical density today) and $\Omega_m$ the matter density parameter
+  (`LinearAlignmentSystematic`; $A_{\rm IA}$, $\alpha_z$, $z_{\rm piv}$ are `ia_bias`, `alphaz`,
+  `z_piv`, shared by all source bins);
+* cosmology: CCL in pure CCL mode, with the matter power spectrum P(k) from Eisenstein-Hu
+  (linear) and halofit (nonlinear),
   amplitude set by `sigma8`. All three frameworks evaluate the same theory.
 
 Spectra are computed in the Limber approximation and averaged over the top-hat
@@ -78,12 +83,16 @@ bandpower windows of the SACC file.
 
 ## Data and covariance
 
-`generate_data.py` reads the tracers, their n(z), the list of 27 spectra and the
+`generate_data.py` reads the tracers, their redshift distributions dN/dz, the list of 27 spectra and the
 bandpower windows from the input SACC file. It does not use the input data vector or
 covariance.
 
 **Mean.** The theory vector of `forecast_3x2pt.py` at the fiducial point
-(`generate_data.FIDUCIAL`):
+(`generate_data.FIDUCIAL`). Ω_c, Ω_b and Ω_k are the cold dark matter, baryon and curvature
+density parameters; h is the Hubble constant H₀ in units of 100 km s⁻¹ Mpc⁻¹; n_s is the scalar
+spectral index; σ8 is the rms of the linear matter density contrast in spheres of radius
+8 h⁻¹ Mpc today; w0 and wa set the dark energy equation of state w(a) = w0 + wa (1 - a) at scale
+factor a; Σm_ν is the sum of the neutrino masses; z̄_i is the mean redshift of lens bin i.
 
 | parameters | fiducial value | what it gives |
 |---|---|---|
@@ -98,27 +107,32 @@ covariance.
 The cosmology and the lens bias follow the SRD Y1 forecast; the magnification and the
 intrinsic alignment amplitude are choices of this forecast, not SRD values.
 
-**Covariance.** The Gaussian covariance of the bandpowers on a fraction f_sky of the sky,
+**Covariance.** The data vector holds the bandpowers
+$C^{ab}_B \equiv \sum_\ell w_B(\ell)\, C^{ab}_\ell$ of tracers $a$ and $b$, where $w_B$ is the
+window of bandpower $B$. Their covariance $\Sigma$ is the Gaussian covariance on a fraction
+$f_{\rm sky}$ of the sky,
 $$
-\mathrm{Cov}\left[C^{ab}_L, C^{cd}_{L'}\right] = \sum_\ell \frac{w_L(\ell)\, w_{L'}(\ell)}{(2\ell+1) f_{\rm sky}} \left[\tilde C^{ac}_\ell \tilde C^{bd}_\ell + \tilde C^{ad}_\ell \tilde C^{bc}_\ell\right],
+\Sigma\left[C^{ab}_B, C^{cd}_{B'}\right] = \sum_\ell \frac{w_B(\ell)\, w_{B'}(\ell)}{(2\ell+1) f_{\rm sky}} \left[\tilde C^{ac}_\ell \tilde C^{bd}_\ell + \tilde C^{ad}_\ell \tilde C^{bc}_\ell\right],
 $$
-where $w_L$ is the window of bandpower L and $\tilde C^{ab}_\ell \equiv C^{ab}_\ell + N^{ab}$.
-The signal $C^{ab}_\ell$ is computed for all 55 pairs of the 10 tracers at the fiducial
-point. The noise follows the LSST DESC Science Requirements Document (arXiv:1809.01669)
-for Y1:
+where $\tilde C^{ab}_\ell \equiv C^{ab}_\ell + N^{ab}$. The noise $N^{ab}$ is zero for
+$a \neq b$, $1/\bar n_a$ for a lens bin and $\sigma_e^2/\bar n_a$ for a source bin, where
+$\bar n_a$ is the number density of galaxies in bin $a$ and $\sigma_e$ the shape noise per
+ellipticity component. The signal $C^{ab}_\ell$ is computed for all 55 pairs of the 10 tracers
+at the fiducial point. The noise follows the LSST DESC Science Requirements Document
+(arXiv:1809.01669) for Y1:
 
 | quantity | value |
 |---|---|
-| f_sky | 0.3 (12300 deg²) |
-| lens densities, bins 0 to 4 | 2.40, 3.82, 4.29, 4.05, 3.44 arcmin⁻² (18 in total) |
-| source density per bin | 2.0 arcmin⁻² (10 in total, equal-number bins) |
-| shape noise σ_e | 0.26 per component |
+| $f_{\rm sky}$ | 0.3 (12300 deg²) |
+| lens $\bar n_a$, bins 0 to 4 | 2.40, 3.82, 4.29, 4.05, 3.44 arcmin⁻² (18 in total) |
+| source $\bar n_a$ per bin | 2.0 arcmin⁻² (10 in total, equal-number bins) |
+| $\sigma_e$ | 0.26 per component |
 
-$N^{ab} = 0$ for $a \neq b$, $1/\bar n_a$ for a lens bin and $\sigma_e^2/\bar n_a$ for a
-source bin. The total signal-to-noise of the noiseless data vector is 1541.
+The total signal-to-noise of the noiseless data vector is 1541.
 
-**Noise realization.** The noisy file has the mean $\mu + L z$, where $C = L L^T$ is the
-Cholesky factorization of the covariance and $z$ is a standard normal vector drawn after
+**Noise realization.** The noisy file has the mean $\mu + L \xi$, where $\mu$ is the noiseless
+data vector, $\Sigma = L L^T$ is the Cholesky factorization of the covariance and $\xi$ is a
+standard normal vector drawn after
 `np.random.seed(20261103)` (Firecrown `make_realization`). Its chi² at the fiducial
 point is 539.08 for 540 data points.
 
