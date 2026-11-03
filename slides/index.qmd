@@ -287,6 +287,66 @@ tools = ModelingTools(ccl_factory=CCLFactory(
 **Pure CCL mode**: CCL computes the cosmology (Eisenstein-Hu and halofit) inside the likelihood, so
 CosmoSIS, Cobaya and NumCosmo evaluate the same theory.
 
+## The YAML Factory: An Analysis Without Python {.tall-code}
+
+The same kind of 3×2pt likelihood, described in YAML and built by Firecrown's own factory:
+
+```bash
+$ firecrown examples des_y1_3x2pt des --FACTORY-TYPE yaml_default --target-framework cosmosis
+```
+
+:::: {.columns}
+
+::: {.column width="55%"}
+`des_y1_3x2pt_experiment.yaml`
+
+```yaml
+data_source:
+  sacc_data_file: des_y1_3x2pt.hdf5
+
+two_point_factory:
+  correlation_space: real
+  number_counts_factories:
+    - type_source: default
+      global_systematics: []
+      per_bin_systematics:
+        - type: PhotoZShiftFactory
+  weak_lensing_factories:
+    - type_source: default
+      global_systematics:
+        - type: LinearAlignmentSystematicFactory
+          alphag: 1
+      per_bin_systematics:
+        - type: MultiplicativeShearBiasFactory
+        - type: PhotoZShiftFactory
+
+ccl_factory:
+  require_nonlinear_pk: true
+```
+:::
+
+::: {.column width="45%"}
+`cosmosis_des_y1_3x2pt.ini`
+
+```ini
+[firecrown_likelihood]
+likelihood_source = firecrown.likelihood.factories.build_two_point_likelihood
+likelihood_config = des_y1_3x2pt_experiment.yaml
+```
+
+- No factory file: `build_two_point_likelihood` reads the YAML and the SACC file.
+- One source per tracer in the SACC file; **per-bin** systematics get one parameter per tracer
+  (`lens0_delta_z`, `src2_mult_bias`, ...), **global** ones are shared (`ia_bias`).
+- `ccl_factory` sets how CCL computes the cosmology.
+
+Firecrown's factories are being migrated to this YAML interface.
+:::
+
+::::
+
+Tutorial: [Two-point factory basics](https://firecrown.readthedocs.io/en/latest/_static/two_point_factory_basics.html) ·
+[Two-point workflow](https://firecrown.readthedocs.io/en/latest/_static/two_point_workflow.html)
+
 ## Data and Covariance: `generate_data.py`
 
 **Mean**: the theory vector at the fiducial point, `likelihood.make_realization(sacc, add_noise=False)`.
