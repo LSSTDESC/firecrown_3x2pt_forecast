@@ -4,3 +4,7 @@ cobaya/
 numcosmo/
 __pycache__/
 .mypy_cache/
+# Rendered by quarto render slides/index.qmd (published by .github/workflows/slides.yml)
+slides/index.html
+slides/index_files/
+slides/.quarto/

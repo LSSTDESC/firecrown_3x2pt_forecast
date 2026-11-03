@@ -1,0 +1,47 @@
+# Render slides/index.qmd with Quarto and publish it on GitHub Pages.
+#
+# Runs on every push to main that changes slides/, and on demand. The repository's Pages
+# source must be set to "GitHub Actions" (Settings > Pages). The slides contain no
+# executed code, so the job needs Quarto only.
+name: slides
+
+on:
+  push:
+    branches: [main]
+    paths: ["slides/**", ".github/workflows/slides.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Render the slides
+        run: quarto render slides/index.qmd
+      - name: Collect the site
+        run: |
+          mkdir _site
+          cp -r slides/index.html slides/index_files slides/figures slides/logo-final.png _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

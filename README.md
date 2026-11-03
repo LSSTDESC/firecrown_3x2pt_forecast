@@ -47,6 +47,14 @@ holds its own copy of the factory and of the SACC file. The configurations evalu
 likelihood once (CosmoSIS sampler `test`, Cobaya sampler `evaluate`,
 `numcosmo run test`); change the sampler there to run a chain.
 
+## Slides
+
+`slides/index.qmd` is a 20-minute introduction to Firecrown and to this forecast (Quarto
+RevealJS), with links to the Firecrown tutorial. Render it with
+`quarto render slides/index.qmd`. On GitHub, `.github/workflows/slides.yml` renders it and
+publishes it on GitHub Pages on every push to `main` that changes `slides/`; the
+repository's Pages source must be set to "GitHub Actions".
+
 ## Model
 
 `forecast_3x2pt.py` builds a Firecrown `ConstGaussian` likelihood:

@@ -1,0 +1,51 @@
+/*-- scss:defaults --*/
+
+// $presentation-font-size-root: 32px;
+
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+$font-family-serif: "Crimson Pro", serif;
+$presentation-heading-font: "Crimson Pro", serif;
+$font-family-serif: "Crimson Pro", serif;
+$link-color: #1111ff;
+$red: #dc1111;
+
+/*-- scss:rules --*/
+
+.reveal .alert {
+  color: $red;
+}
+
+.reveal .slide-number {
+  // color: $link-color;
+  font-size: 0.8em !important;
+}
+
+.reveal .title-slide h1 {
+  text-align: center;
+}
+
+.reveal .footer {
+  font-size: 0.8em !important;
+  text-align: center !important;
+}
+
+.reveal code {
+  // Monospaced fonts typically are larger than
+  font-size: smaller;
+}
+
+.reveal .sourceCode {
+  // This is used for code blocks, not inline code
+  font-size: smaller;
+}
+
+// Slides marked {.tall-code} let their code/output blocks grow past the default
+// 400px/500px caps, so long console output uses the whole slide instead of
+// scrolling inside a short box. Type size is left alone.
+.reveal .tall-code {
+  pre code,
+  div.sourceCode code {
+    max-height: none;
+  }
+}
