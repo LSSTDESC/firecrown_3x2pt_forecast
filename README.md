@@ -50,7 +50,8 @@ likelihood once (CosmoSIS sampler `test`, Cobaya sampler `evaluate`,
 ## Slides
 
 `slides/index.qmd` is a 20-minute introduction to Firecrown and to this forecast (Quarto
-RevealJS), with links to the Firecrown tutorial. Render it with
+RevealJS), with links to the Firecrown tutorial. It is published at
+<https://lsstdesc.org/firecrown_3x2pt_forecast/>. Render it locally with
 `quarto render slides/index.qmd`. On GitHub, `.github/workflows/slides.yml` renders it and
 publishes it on GitHub Pages on every push to `main` that changes `slides/`; the
 repository's Pages source must be set to "GitHub Actions".
