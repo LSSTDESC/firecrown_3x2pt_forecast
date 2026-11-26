@@ -395,28 +395,80 @@ parameters: $\Omega_c$, $\sigma_8$, `ia_bias`, `lens0_bias` … `lens4_bias`.
 :::: {.columns}
 
 ::: {.column width="45%"}
-![](figures/apes_burnin12.corner.png){fig-alt="Corner plot of the APES chain: ia_bias, five lens biases, Omega_c and sigma8."}
+![](figures/apes_burnin18.corner.png){fig-alt="Corner plot of the APES chain: ia_bias, five lens biases, Omega_c and sigma8."}
 :::
 
 ::: {.column width="55%"}
-NumCosmo APES, 11 MPI processes, 900 walkers, 21 iterations (2 h 10 min).
+NumCosmo APES, 12 MPI processes, 900 walkers, 100 iterations: 90 000 evaluations (2 h 17 min).
 
-Burn-in: 12 iterations, where the ensemble variance of $-2\ln\mathcal{L}$ stops decreasing.
+Burn-in: 18 iterations, suggested by `numcosmo catalog analyze` (constant break point).
 Gelman-Rubin $R$: the variance of a parameter across chains divided by its variance within chains;
 $R - 1 \to 0$ as the samples converge.
 
-| quantity | value |
+| quantity (after burn-in) | value |
 |---|---|
-| Gelman-Rubin $R - 1$ (parameters) | 0.04 to 0.06 |
-| $\mathrm{Var}(-2\ln\mathcal{L})$ | 15.2 (16 for a Gaussian in 8 dimensions) |
-| $\Omega_c$ | $0.2673 \pm 0.0018$ (fiducial 0.2664) |
-| $\sigma_8$ | $0.8313 \pm 0.0024$ (fiducial 0.831) |
+| Gelman-Rubin $R - 1$ (parameters) | at most 0.008 |
+| $\mathrm{Var}(-2\ln\mathcal{L})$ | 15.8 (16 for a Gaussian in 8 dimensions) |
+| $\Omega_c$ | $0.2671 \pm 0.0018$ (fiducial 0.2664) |
+| $\sigma_8$ | $0.8315 \pm 0.0024$ (fiducial 0.831) |
 
-$\sigma_8$ is anti-correlated with every lens bias ($-55\%$ to $-62\%$). Combining clustering,
-galaxy-galaxy lensing and shear constrains both.
+The amplitude $\sigma_8$ is anti-correlated with every lens bias ($-97\%$ to $-98\%$) and with
+$\Omega_c$ ($-93\%$). Combining clustering, galaxy-galaxy lensing and shear constrains both.
 :::
 
 ::::
+
+## nautilus in CosmoSIS: `run_nautilus.sh` {.smaller}
+
+:::: {.columns}
+
+::: {.column width="45%"}
+![](figures/apes_nautilus.corner.png){fig-alt="Corner plot of the APES and nautilus posteriors overlaid: ia_bias, five lens biases, Omega_c and sigma8."}
+:::
+
+::: {.column width="55%"}
+CosmoSIS `nautilus`, 12 MPI processes, 2000 live points, CosmoSIS defaults otherwise
+(`discard_exploration = F`, `f_live = 0.01`): 156 600 evaluations (4 h 10 min).
+The nautilus contours (blue) cover the APES contours (red) of the previous slide.
+
+The nautilus sampler first explores the posterior, adding shells of increasing likelihood until the live
+set holds less than the fraction `f_live` of the evidence $Z$. It cannot stop on `n_eff` before
+then. This run reached an effective sample size of 19 996 during exploration, so the requested
+`n_eff = 2000` did not change its length.
+
+| quantity | value |
+|---|---|
+| effective sample size $(\sum_i w_i)^2 / \sum_i w_i^2$ | 19 996 |
+| $\Omega_c$ | $0.2671 \pm 0.0019$ (fiducial 0.2664) |
+| $\sigma_8$ | $0.8315 \pm 0.0024$ (fiducial 0.831) |
+| $\ln Z$ (normalized flat priors) | $-313.685$ |
+
+The weight of output point $i$ is $w_i$.
+:::
+
+::::
+
+## APES and nautilus {.smaller}
+
+| | NumCosmo APES | CosmoSIS nautilus |
+|---|---|---|
+| likelihood evaluations | 90 000 | 156 600 |
+| wall time, 12 processes | 2 h 17 min | 4 h 10 min |
+| effective sample size | 19 765 (smallest of the 8 parameters) | 19 996 |
+| $\Omega_c$ | $0.26714 \pm 0.00185$ | $0.26714 \pm 0.00187$ |
+| $\sigma_8$ | $0.83154 \pm 0.00239$ | $0.83154 \pm 0.00242$ |
+| $\ln Z$ (normalized flat priors) | $-313.659 \pm 0.003$ | $-313.685$ |
+
+The APES effective sample size is $K_{\rm eff}\, n_{\rm iter} / \tau$, where $\tau$ is the
+autocorrelation time of the per-iteration mean over the walkers, $n_{\rm iter} = 82$ is the
+number of iterations after burn-in, and $K_{\rm eff}$ (684 to 851 of the 900 walkers) is the
+variance of one walker divided by the variance of that mean. Each APES chain is shorter than
+$50\tau$, so $\tau$ (2.3 to 3.2 iterations), and the effective sample size computed from it, are
+approximate.
+
+The means of all 8 parameters differ by at most 0.3 standard errors of the mean; the nautilus
+standard deviations are 1.0% to 1.3% larger for every parameter. CosmoSIS reports
+$1/\sqrt{n_{\rm eff}} = 0.007$ as the nautilus $\ln Z$ error, which is not a measured error.
 
 ## Cobaya with the APES Covariance: `run_cobaya.sh` {.smaller}
 
@@ -424,7 +476,7 @@ Cobaya `mcmc`, 10 chains under MPI, stopping when the Gelman-Rubin $R - 1$ of th
 
 | initial proposal | acceptance |
 |---|---|
-| diagonal, 1% of each fiducial value | 2.8% (one chain, 720 steps) |
+| diagonal, 1% of each fiducial value | 2.4% (12 chains, first 31 min); the run stops after 1 h, when one chain rejects 320 consecutive proposals (`max_tries` $= 40 d$, $d = 8$) |
 | APES posterior covariance (`apes_covmat.py`) | 30% (10 chains, 11165 steps) |
 
 The 1% widths are 1.5 to 3.5 times the posterior widths, and the posterior is strongly correlated, so
@@ -443,8 +495,13 @@ python generate_data.py          # data vectors and covariance (about 15 s)
 python generate_configs.py       # CosmoSIS, Cobaya and NumCosmo configurations
 ./run_test.sh                    # one evaluation in each framework
 ./run_apes.sh                    # NumCosmo APES with MPI (needs the mpi_openmpi build)
-python numcosmo_catalog.py plot-corner numcosmo/apes.mcmc.fits --burnin 12 --no-show --output numcosmo/apes
-python apes_covmat.py && ./run_cobaya.sh   # Cobaya mcmc with the APES covariance
+numcosmo catalog plot-corner numcosmo/apes.mcmc.fits --burnin 18 --no-show --output numcosmo/apes
+./run_nautilus.sh                # CosmoSIS nautilus with MPI
+python nautilus_to_catalog.py    # nautilus samples as a weighted NumCosmo catalog
+numcosmo catalog plot-corner numcosmo/apes.mcmc.fits cosmosis/output/nautilus.mcmc.fits \
+    --burnin 18 --thin 1 --plot-name "NumCosmo APES" --plot-name "CosmoSIS nautilus" \
+    --no-show --output numcosmo/apes_nautilus
+python apes_covmat.py 18 && ./run_cobaya.sh   # Cobaya mcmc with the APES covariance
 ```
 
 Tutorial: [Firecrown tutorials](https://firecrown.readthedocs.io/en/latest/_static/index.html) ·

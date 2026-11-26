@@ -16,20 +16,30 @@
 # leaves cobaya/mcmc/chain.input.yaml.locked behind; delete it before resuming when no
 # Cobaya process is running.
 #
+# Resuming with a smaller RMINUS1_STOP continues the chains past the previous stop: Cobaya
+# takes Rminus1_stop from the new input when it resumes.
+#
 # Settings, each overridable from the environment:
-#   NPROC  MPI processes, i.e. chains (default 10)
+#   NPROC         MPI processes, i.e. chains (default 10)
+#   RMINUS1_STOP  Gelman-Rubin R - 1 of the means at which Cobaya stops (default 0.01,
+#                 Cobaya's default)
 #
 # Usage: ./run_cobaya.sh
 
 cd "$(dirname "$0")/cobaya" || exit 1
 
 NPROC=${NPROC:-10}
+export RMINUS1_STOP=${RMINUS1_STOP:-0.01}
 
 python - <<'EOF' || exit 1
+import os
 from pathlib import Path
+
 text = open("cobaya_forecast_3x2pt.yaml").read()
 assert "sampler:\n  evaluate: null\n" in text and "\noutput: output\n" in text
-mcmc = "  mcmc:\n    covmat: apes.covmat\n" if Path("apes.covmat").exists() else "  mcmc: {}\n"
+mcmc = "  mcmc:\n    Rminus1_stop: " + os.environ["RMINUS1_STOP"] + "\n"
+if Path("apes.covmat").exists():
+    mcmc += "    covmat: apes.covmat\n"
 text = text.replace("sampler:\n  evaluate: null\n", "sampler:\n" + mcmc)
 text = text.replace("\noutput: output\n", "\noutput: mcmc/chain\n")
 open("cobaya_forecast_3x2pt_mcmc.yaml", "w").write(text)

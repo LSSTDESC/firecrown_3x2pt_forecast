@@ -15,15 +15,10 @@ parameters ia_bias, alphaz and z_piv are shared by all source bins.
 CCL computes the cosmology in pure CCL mode: Eisenstein-Hu linear P(k), halofit
 nonlinear P(k), amplitude set by sigma8. CosmoSIS, Cobaya and NumCosmo therefore all
 evaluate the same theory.
-
-Importing this module replaces Firecrown's cached_angular_cl by the function it wraps.
-Its lru_cache hashes the CCL objects on every call, which takes about 30% of one
-likelihood evaluation, and it has no hits when the cosmology changes between calls.
 """
 
 import os
 
-import firecrown.likelihood._two_point as _two_point
 import firecrown.likelihood.number_counts as nc
 import firecrown.likelihood.weak_lensing as wl
 from firecrown.likelihood import ConstGaussian, Likelihood, NamedParameters, TwoPoint
@@ -33,11 +28,6 @@ from firecrown.modeling_tools._ccl_factory import (
     CCLCreationMode,
     CCLPureModeTransferFunction,
     PoweSpecAmplitudeParameter,
-)
-
-# getattr keeps the replacement correct when the module is loaded twice in one process.
-_two_point.cached_angular_cl = getattr(
-    _two_point.cached_angular_cl, "__wrapped__", _two_point.cached_angular_cl
 )
 
 N_LENS = 5
