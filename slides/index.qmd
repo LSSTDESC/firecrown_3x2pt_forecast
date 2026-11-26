@@ -420,8 +420,16 @@ $\Omega_c$ ($-93\%$). Combining clustering, galaxy-galaxy lensing and shear cons
 
 ## nautilus in CosmoSIS: `run_nautilus.sh` {.smaller}
 
+:::: {.columns}
+
+::: {.column width="45%"}
+![](figures/apes_nautilus.corner.png){fig-alt="Corner plot of the APES and nautilus posteriors overlaid: ia_bias, five lens biases, Omega_c and sigma8."}
+:::
+
+::: {.column width="55%"}
 CosmoSIS `nautilus`, 12 MPI processes, 2000 live points, CosmoSIS defaults otherwise
 (`discard_exploration = F`, `f_live = 0.01`): 156 600 evaluations (4 h 10 min).
+The nautilus contours (blue) cover the APES contours (red) of the previous slide.
 
 The nautilus sampler first explores the posterior, adding shells of increasing likelihood until the live
 set holds less than the fraction `f_live` of the evidence $Z$. It cannot stop on `n_eff` before
@@ -436,6 +444,9 @@ then. This run reached an effective sample size of 19 996 during exploration, so
 | $\ln Z$ (normalized flat priors) | $-313.685$ |
 
 The weight of output point $i$ is $w_i$.
+:::
+
+::::
 
 ## APES and nautilus {.smaller}
 
@@ -486,6 +497,10 @@ python generate_configs.py       # CosmoSIS, Cobaya and NumCosmo configurations
 ./run_apes.sh                    # NumCosmo APES with MPI (needs the mpi_openmpi build)
 numcosmo catalog plot-corner numcosmo/apes.mcmc.fits --burnin 18 --no-show --output numcosmo/apes
 ./run_nautilus.sh                # CosmoSIS nautilus with MPI
+python nautilus_to_catalog.py    # nautilus samples as a weighted NumCosmo catalog
+numcosmo catalog plot-corner numcosmo/apes.mcmc.fits cosmosis/output/nautilus.mcmc.fits \
+    --burnin 18 --thin 1 --plot-name "NumCosmo APES" --plot-name "CosmoSIS nautilus" \
+    --no-show --output numcosmo/apes_nautilus
 python apes_covmat.py 18 && ./run_cobaya.sh   # Cobaya mcmc with the APES covariance
 ```
 

@@ -28,6 +28,7 @@ the likelihood.
 | `run_apes.sh` | runs the NumCosmo APES sampler under MPI (needs the `mpi_openmpi` or `mpi_mpich` build of NumCosmo) |
 | `run_nautilus.sh` | runs the CosmoSIS nautilus sampler under MPI; `RESUME=T` continues a saved run |
 | `run_cobaya.sh` | runs the Cobaya mcmc sampler under MPI, one chain per process; resumes the chains in `cobaya/mcmc/` |
+| `nautilus_to_catalog.py` | writes the nautilus samples as a weighted NumCosmo catalog, `cosmosis/output/nautilus.mcmc.fits` |
 | `apes_covmat.py` | writes the APES posterior covariance as a Cobaya covmat file, `cobaya/apes.covmat` |
 | `paul_auto_forecast_fid_3x2pt_linear_sys_limber_20_log_bins.sacc` | input: tracers, dN/dz and bandpower windows |
 | `forecast_3x2pt_srd_y1.sacc` | noiseless data vector and covariance |
