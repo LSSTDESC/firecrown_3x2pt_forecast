@@ -5,6 +5,9 @@ and NumCosmo with Firecrown. The data vector has 27 harmonic-space spectra from 
 bins and 5 source bins: 5 galaxy clustering autospectra, 7 galaxy-galaxy lensing
 spectra and 15 cosmic shear spectra, each in 20 bandpowers over 20 ≤ ℓ ≤ 2000.
 
+Sampler results (NumCosmo APES and CosmoSIS nautilus) and their main points are in
+[RESULTS.md](RESULTS.md).
+
 ## Requirements
 
 Firecrown 1.16.2 with CosmoSIS, Cobaya and NumCosmo; `run_apes.sh` needs the MPI build of
