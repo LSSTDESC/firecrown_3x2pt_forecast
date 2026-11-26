@@ -7,9 +7,10 @@ spectra and 15 cosmic shear spectra, each in 20 bandpowers over 20 ≤ ℓ ≤ 2
 
 ## Requirements
 
-Firecrown 1.16.1 with CosmoSIS, Cobaya and NumCosmo, for example:
+Firecrown 1.16.2 with CosmoSIS, Cobaya and NumCosmo; `run_apes.sh` needs the MPI build of
+NumCosmo. For example:
 ```bash
-conda create --name firecrown_user -c conda-forge firecrown-validated
+conda create --name firecrown_user -c conda-forge firecrown-validated 'numcosmo=*=mpi_openmpi*'
 conda activate firecrown_user
 python -m pip install cobaya isitgr
 ```
@@ -25,8 +26,6 @@ the likelihood.
 | `generate_configs.py` | writes the CosmoSIS, Cobaya and NumCosmo configurations |
 | `run_test.sh` | evaluates the likelihood once in each framework |
 | `run_apes.sh` | runs the NumCosmo APES sampler under MPI (needs the `mpi_openmpi` or `mpi_mpich` build of NumCosmo) |
-| `numcosmo_mpi.py` | starts the `numcosmo` command line with the Firecrown types and models registered in every MPI rank (used by `run_apes.sh`) |
-| `numcosmo_catalog.py` | runs `numcosmo catalog` (`analyze`, `plot-corner`, ...) after creating the models the catalog refers to |
 | `paul_auto_forecast_fid_3x2pt_linear_sys_limber_20_log_bins.sacc` | input: tracers, dN/dz and bandpower windows |
 | `forecast_3x2pt_srd_y1.sacc` | noiseless data vector and covariance |
 | `forecast_3x2pt_srd_y1_noisy.sacc` | the same data vector plus one realization of the noise |
@@ -152,16 +151,7 @@ All other parameters are fixed at their fiducial values. The lists `CCL_PARAMETE
 `FIRECROWN_PARAMETERS` in `generate_configs.py` set which parameters are free and their
 ranges.
 
-## Changes to Firecrown 1.16.1 behavior
+## Changes to Firecrown 1.16.2 behavior
 
-* `forecast_3x2pt.py` replaces `firecrown.likelihood._two_point.cached_angular_cl` by
-  the function it wraps. The `lru_cache` hashes the CCL objects on every call, which
-  takes about 30% of an evaluation, and has no hits when the cosmology changes. One
-  evaluation takes about 0.7 s with 10 threads on an Intel i7-1255U.
-* `generate_configs.py` replaces `firecrown.app.analysis._cosmosis.format_float`, which
-  writes CosmoSIS values with 3 significant digits, by a function that writes them in
-  full precision.
 * `generate_configs.py` writes `cosmosis/firecrown_cosmosis.py`, which imports the
   CosmoSIS connector of the installed Firecrown, and points the `.ini` to it.
-* `generate_configs.py` sets `<name>-fit: true` for the free parameters in the NumCosmo
-  experiment file, where the generator writes `<name>-fit: false` for every parameter.

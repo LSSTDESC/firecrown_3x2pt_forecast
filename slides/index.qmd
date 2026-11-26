@@ -443,7 +443,7 @@ python generate_data.py          # data vectors and covariance (about 15 s)
 python generate_configs.py       # CosmoSIS, Cobaya and NumCosmo configurations
 ./run_test.sh                    # one evaluation in each framework
 ./run_apes.sh                    # NumCosmo APES with MPI (needs the mpi_openmpi build)
-python numcosmo_catalog.py plot-corner numcosmo/apes.mcmc.fits --burnin 12 --no-show --output numcosmo/apes
+numcosmo catalog plot-corner numcosmo/apes.mcmc.fits --burnin 12 --no-show --output numcosmo/apes
 python apes_covmat.py && ./run_cobaya.sh   # Cobaya mcmc with the APES covariance
 ```
 

@@ -20,19 +20,10 @@ starting point is drawn from a Gaussian centered on the fiducial value with stan
 deviation equal to the parameter scale (1% of the fiducial value), and the scale is the
 initial proposal width.
 
-Three changes to what Firecrown 1.16.1 writes:
-
-* its generator writes values with 3 significant digits
-  (firecrown.app.analysis._cosmosis.format_float). This script replaces format_float by
-  a function that writes the shortest exact decimal representation, so that the fixed
-  parameters keep their fiducial values;
-* its .ini points to the connector inside the Firecrown installation. This script
-  writes cosmosis/firecrown_cosmosis.py, which imports the connector of the Firecrown
-  installed in the running Python environment, and points the .ini to it, as the
-  generator on Firecrown master does;
-* its NumCosmo experiment file sets <name>-fit: false for every parameter of the model
-  set, which overrides the free parameters declared in the builders file. This script
-  sets <name>-fit: true for the free parameters.
+One change to what Firecrown 1.16.2 writes: its .ini points to the connector inside the
+Firecrown installation. This script writes cosmosis/firecrown_cosmosis.py, which imports
+the connector of the Firecrown installed in the running Python environment, and points
+the .ini to it, as the generator on Firecrown master does.
 
 Usage: python generate_configs.py [--noiseless] [--only cosmosis|cobaya|numcosmo]
 --only regenerates one framework directory and leaves the others untouched.
@@ -44,7 +35,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar
 
-import firecrown.app.analysis._cosmosis as _cosmosis
 from firecrown.app.analysis import (
     AnalysisBuilder,
     FrameworkCosmology,
@@ -56,8 +46,6 @@ from firecrown.app.sacc import SaccFormat
 from firecrown.likelihood import NamedParameters
 
 from generate_data import FIDUCIAL, OUTPUT_NOISY_SACC, OUTPUT_SACC
-
-_cosmosis.format_float = lambda value: repr(float(value))
 
 HERE = Path(__file__).resolve().parent
 SACC_FILE = OUTPUT_SACC if "--noiseless" in sys.argv[1:] else OUTPUT_NOISY_SACC
@@ -192,13 +180,3 @@ if __name__ == "__main__":
             text = text.replace(old, new)
         yaml_path.write_text(text, encoding="utf-8")
 
-    if Frameworks.NUMCOSMO in frameworks:
-        # Mark the free parameters free in the NumCosmo model set. NumCosmo property names
-        # replace "_" by "-".
-        experiment_path = HERE / Frameworks.NUMCOSMO.value / "numcosmo_forecast_3x2pt.yaml"
-        text = experiment_path.read_text(encoding="utf-8")
-        for p in free_parameters:
-            flag = f"{p.name.replace('_', '-')}-fit:"
-            assert text.count(f" {flag} false\n") == 1, flag
-            text = text.replace(f" {flag} false\n", f" {flag} true\n")
-        experiment_path.write_text(text, encoding="utf-8")

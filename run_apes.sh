@@ -4,10 +4,8 @@
 # Runs numcosmo run mcmc apes on numcosmo/numcosmo_forecast_3x2pt.yaml (written by
 # generate_configs.py) under mpiexec with NPROC processes: rank 0 runs APES and the
 # other NPROC - 1 ranks evaluate the likelihood, one OpenMP thread each. It needs the
-# MPI build of NumCosmo (conda-forge build string mpi_openmpi or mpi_mpich). The
-# command line is started through numcosmo_mpi.py, which registers the Firecrown types
-# in every rank before NumCosmo starts the MPI workers. The catalog is written to
-# numcosmo/apes.mcmc.fits and the log to numcosmo/apes.log.
+# MPI build of NumCosmo (conda-forge build string mpi_openmpi or mpi_mpich). The catalog
+# is written to numcosmo/apes.mcmc.fits and the log to numcosmo/apes.log.
 #
 # When numcosmo/apes.mcmc.fits exists, APES continues it up to NSAMPLES iterations, with
 # the random number generator state saved in the catalog; SEED is then not passed, since
@@ -41,7 +39,7 @@ fi
 # place the processes. --mca btl self,sm restricts communication to shared memory, the
 # transport between processes on one machine.
 mpiexec -n "$NPROC" --use-hwthread-cpus --bind-to none --mca btl self,sm \
-    python ../numcosmo_mpi.py run mcmc apes numcosmo_forecast_3x2pt.yaml \
+    numcosmo run mcmc apes numcosmo_forecast_3x2pt.yaml \
     --parallel mpi \
     --nwalkers "$NWALKERS" \
     --nsamples "$NSAMPLES" \
