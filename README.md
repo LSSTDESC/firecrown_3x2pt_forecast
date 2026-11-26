@@ -26,6 +26,9 @@ the likelihood.
 | `generate_configs.py` | writes the CosmoSIS, Cobaya and NumCosmo configurations |
 | `run_test.sh` | evaluates the likelihood once in each framework |
 | `run_apes.sh` | runs the NumCosmo APES sampler under MPI (needs the `mpi_openmpi` or `mpi_mpich` build of NumCosmo) |
+| `run_nautilus.sh` | runs the CosmoSIS nautilus sampler under MPI; `RESUME=T` continues a saved run |
+| `run_cobaya.sh` | runs the Cobaya mcmc sampler under MPI, one chain per process; resumes the chains in `cobaya/mcmc/` |
+| `apes_covmat.py` | writes the APES posterior covariance as a Cobaya covmat file, `cobaya/apes.covmat` |
 | `paul_auto_forecast_fid_3x2pt_linear_sys_limber_20_log_bins.sacc` | input: tracers, dN/dz and bandpower windows |
 | `forecast_3x2pt_srd_y1.sacc` | noiseless data vector and covariance |
 | `forecast_3x2pt_srd_y1_noisy.sacc` | the same data vector plus one realization of the noise |
